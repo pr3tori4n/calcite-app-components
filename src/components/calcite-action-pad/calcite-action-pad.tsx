@@ -2,7 +2,7 @@ import { Component, Element, Event, EventEmitter, Host, Prop, Watch, h } from "@
 import { CalciteLayout, CalcitePosition, CalciteTheme } from "../interfaces";
 import { CalciteExpandToggle, toggleChildActionText } from "../utils/CalciteExpandToggle";
 import { CSS, TEXT } from "./resources";
-import { getCalcitePosition } from "../utils/dom";
+import { getCalcitePosition, getElementProp } from "../utils/dom";
 
 /**
  * @slot - A slot for adding `calcite-action`s to the action pad.
@@ -155,6 +155,7 @@ export class CalciteActionPad {
         intlExpand={expandLabel}
         intlCollapse={collapseLabel}
         el={el}
+        theme={getElementProp(el, "theme", "light")}
         position={getCalcitePosition(position, layout)}
         toggleExpand={toggleExpand}
       />

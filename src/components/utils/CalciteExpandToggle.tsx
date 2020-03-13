@@ -1,11 +1,12 @@
 import { FunctionalComponent, h } from "@stencil/core";
 import { getElementDir } from "./dom";
-import { CalcitePosition } from "../interfaces";
+import { CalcitePosition, CalciteTheme } from "../interfaces";
 
 interface CalciteExpandToggleProps {
   expanded: boolean;
   intlExpand: string;
   intlCollapse: string;
+  theme: CalciteTheme;
   el: HTMLElement;
   position: CalcitePosition;
   toggleExpand: () => void;
@@ -49,6 +50,7 @@ export const CalciteExpandToggle: FunctionalComponent<CalciteExpandToggleProps> 
   intlCollapse,
   toggleExpand,
   el,
+  theme,
   position
 }) => {
   const rtl = getElementDir(el) === "rtl";
@@ -65,7 +67,7 @@ export const CalciteExpandToggle: FunctionalComponent<CalciteExpandToggleProps> 
   const collapseIcon = end ? icons[0] : icons[1];
 
   return (
-    <calcite-action onClick={toggleExpand} textEnabled={expanded} text={expandText}>
+    <calcite-action onClick={toggleExpand} textEnabled={expanded} text={expandText} theme={theme}>
       <calcite-icon scale="s" icon={expanded ? expandIcon : collapseIcon} />
     </calcite-action>
   );

@@ -9,7 +9,7 @@ import { CSS } from "./resources";
 import { CSS_UTILITY } from "../utils/resources";
 
 import { getElementDir, getElementProp } from "../utils/dom";
-import { VNode, State, Watch } from "@stencil/core/internal";
+import { State, VNode, Watch } from "@stencil/core/internal";
 
 /**
  * @slot - A slot for adding a `calcite-icon`.
@@ -88,6 +88,11 @@ export class CalciteAction {
    */
   @Prop({ reflect: true }) textEnabled = false;
 
+  @Watch("textEnabled")
+  textEnabledHandler() {
+    this.toggleTooltip(this.tooltip);
+  }
+
   /**
    * Used to set the component's color scheme.
    */
@@ -117,6 +122,7 @@ export class CalciteAction {
   @Element() el: HTMLCalciteActionElement;
 
   @State() tooltipText: string = null;
+
   @Watch("tooltipText")
   tooltipTextListener() {
     this.toggleTooltip(this.tooltip);
@@ -173,15 +179,15 @@ export class CalciteAction {
   }
 
   toggleTooltip = (tooltip: boolean): void => {
-    const { el, tooltipEl, tooltipText } = this;
+    const { el, tooltipEl, textEnabled, tooltipText } = this;
 
-    if (tooltip && tooltipText) {
+    if (tooltip && tooltipText && !textEnabled) {
       const tooltipElement = this.setUpTooltip();
       tooltipElement.textContent = tooltipText;
       tooltipElement.referenceElement = el;
       tooltipElement.theme = getElementProp(el, "theme", "light");
     } else {
-      document.body.removeChild(tooltipEl);
+      tooltipEl && document.body.removeChild(tooltipEl);
       this.tooltipEl = null;
     }
   };
