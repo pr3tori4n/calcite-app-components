@@ -8,8 +8,8 @@ import { CSS } from "./resources";
 
 import { CSS_UTILITY } from "../utils/resources";
 
-import { getElementDir } from "../utils/dom";
-import { VNode } from "@stencil/core/internal";
+import { getElementDir, getElementProp } from "../utils/dom";
+import { VNode, State, Watch } from "@stencil/core/internal";
 
 /**
  * @slot - A slot for adding a `calcite-icon`.
@@ -58,6 +58,11 @@ export class CalciteAction {
    */
   @Prop() label?: string;
 
+  @Watch("label")
+  labelHandler() {
+    this.setTooltipText();
+  }
+
   /**
    * When true, content is waiting to be loaded. This state shows a busy indicator.
    */
@@ -73,6 +78,11 @@ export class CalciteAction {
    */
   @Prop() text!: string;
 
+  @Watch("text")
+  textHandler() {
+    this.setTooltipText();
+  }
+
   /**
    * Indicates whether the text is displayed.
    */
@@ -83,6 +93,21 @@ export class CalciteAction {
    */
   @Prop({ reflect: true }) theme: CalciteTheme;
 
+  @Watch("theme")
+  themeHandler() {
+    this.toggleTooltip(this.tooltip);
+  }
+
+  /**
+   * Display a tooltip when hovering or focusing the action.
+   */
+  @Prop({ reflect: true }) tooltip = true;
+
+  @Watch("tooltip")
+  tooltipHandler(tooltip: boolean) {
+    this.toggleTooltip(tooltip);
+  }
+
   // --------------------------------------------------------------------------
   //
   //  Private Properties
@@ -91,7 +116,29 @@ export class CalciteAction {
 
   @Element() el: HTMLCalciteActionElement;
 
+  @State() tooltipText: string = null;
+  @Watch("tooltipText")
+  tooltipTextListener() {
+    this.toggleTooltip(this.tooltip);
+  }
+
   private buttonEl: HTMLButtonElement;
+
+  private tooltipEl: HTMLCalciteTooltipElement;
+
+  // --------------------------------------------------------------------------
+  //
+  //  Lifecycle
+  //
+  // --------------------------------------------------------------------------
+
+  connectedCallback() {
+    this.setTooltipText();
+  }
+
+  componentDidUnload() {
+    this.toggleTooltip(false);
+  }
 
   // --------------------------------------------------------------------------
   //
@@ -103,6 +150,41 @@ export class CalciteAction {
   async setFocus() {
     this.buttonEl.focus();
   }
+
+  // --------------------------------------------------------------------------
+  //
+  //  Private Methods
+  //
+  // --------------------------------------------------------------------------
+
+  setTooltipText = (): void => {
+    this.tooltipText = this.label || this.text;
+  };
+
+  setUpTooltip(): HTMLCalciteTooltipElement {
+    if (this.tooltipEl) {
+      return this.tooltipEl;
+    }
+
+    const tooltipElement = document.createElement("calcite-tooltip");
+    document.body.appendChild(tooltipElement);
+    this.tooltipEl = tooltipElement;
+    return tooltipElement;
+  }
+
+  toggleTooltip = (tooltip: boolean): void => {
+    const { el, tooltipEl, tooltipText } = this;
+
+    if (tooltip && tooltipText) {
+      const tooltipElement = this.setUpTooltip();
+      tooltipElement.textContent = tooltipText;
+      tooltipElement.referenceElement = el;
+      tooltipElement.theme = getElementProp(el, "theme", "light");
+    } else {
+      document.body.removeChild(tooltipEl);
+      this.tooltipEl = null;
+    }
+  };
 
   // --------------------------------------------------------------------------
   //
@@ -151,9 +233,7 @@ export class CalciteAction {
   }
 
   render() {
-    const { compact, disabled, loading, el, textEnabled, label, text } = this;
-
-    const ariaLabel = label || (!textEnabled && text);
+    const { compact, disabled, loading, el, textEnabled, tooltipText } = this;
     const rtl = getElementDir(el) === "rtl";
 
     const buttonClasses = {
@@ -166,7 +246,7 @@ export class CalciteAction {
       <Host>
         <button
           class={classnames(CSS.button, buttonClasses)}
-          aria-label={ariaLabel}
+          aria-label={tooltipText}
           disabled={disabled}
           aria-disabled={disabled.toString()}
           aria-busy={loading.toString()}
