@@ -8,7 +8,7 @@ import { CSS } from "./resources";
 
 import { CSS_UTILITY } from "../utils/resources";
 
-import { getElementDir } from "../utils/dom";
+import { getElementDir, getElementProp } from "../utils/dom";
 import { State, VNode, Watch } from "@stencil/core/internal";
 
 /**
@@ -90,7 +90,7 @@ export class CalciteAction {
 
   @Watch("textEnabled")
   textEnabledHandler() {
-    this.toggleTooltip(this.tooltip);
+    this.toggleTooltip();
   }
 
   /**
@@ -100,7 +100,7 @@ export class CalciteAction {
 
   @Watch("theme")
   themeHandler() {
-    this.toggleTooltip(this.tooltip);
+    this.toggleTooltip();
   }
 
   /**
@@ -109,8 +109,8 @@ export class CalciteAction {
   @Prop({ reflect: true }) tooltip = true;
 
   @Watch("tooltip")
-  tooltipHandler(tooltip: boolean) {
-    this.toggleTooltip(tooltip);
+  tooltipHandler() {
+    this.toggleTooltip();
   }
 
   // --------------------------------------------------------------------------
@@ -125,7 +125,7 @@ export class CalciteAction {
 
   @Watch("tooltipText")
   tooltipTextListener() {
-    this.toggleTooltip(this.tooltip);
+    this.toggleTooltip();
   }
 
   private buttonEl: HTMLButtonElement;
@@ -143,7 +143,7 @@ export class CalciteAction {
   }
 
   componentDidUnload() {
-    this.toggleTooltip(false);
+    this.destroyTooltip();
   }
 
   // --------------------------------------------------------------------------
@@ -167,29 +167,36 @@ export class CalciteAction {
     this.tooltipText = this.label || this.text;
   };
 
-  setUpTooltip(): HTMLCalciteTooltipElement {
+  createTooltip(): void {
     if (this.tooltipEl) {
-      return this.tooltipEl;
+      return;
     }
 
     const tooltipElement = document.createElement("calcite-tooltip");
     document.body.appendChild(tooltipElement);
     this.tooltipEl = tooltipElement;
-    return tooltipElement;
   }
 
-  toggleTooltip = (tooltip: boolean): void => {
-    const { el, tooltipEl, textEnabled, tooltipText, theme } = this;
+  destroyTooltip = (): void => {
+    const { tooltipEl } = this;
+    tooltipEl?.parentElement?.removeChild(tooltipEl);
+    this.tooltipEl = null;
+  };
 
-    if (tooltip && tooltipText && !textEnabled) {
-      const tooltipElement = this.setUpTooltip();
-      tooltipElement.textContent = tooltipText;
-      tooltipElement.referenceElement = el;
-      tooltipElement.theme = theme;
-    } else {
-      tooltipEl?.parentElement?.removeChild(tooltipEl);
-      this.tooltipEl = null;
-    }
+  updateTooltip = (): void => {
+    this.createTooltip();
+
+    const { el, tooltipEl, tooltipText, theme } = this;
+
+    tooltipEl.textContent = tooltipText;
+    tooltipEl.referenceElement = el;
+    tooltipEl.theme = theme || getElementProp(el, "theme", "light");
+  };
+
+  toggleTooltip = (): void => {
+    const { textEnabled, tooltip, tooltipText } = this;
+
+    tooltip && tooltipText && !textEnabled ? this.updateTooltip() : this.destroyTooltip();
   };
 
   // --------------------------------------------------------------------------
