@@ -106,7 +106,7 @@ export class CalciteAction {
   /**
    * Display a tooltip when hovering or focusing the action.
    */
-  @Prop({ reflect: true }) tooltip = true;
+  @Prop({ reflect: true }) tooltip?: boolean;
 
   @Watch("tooltip")
   tooltipHandler() {
