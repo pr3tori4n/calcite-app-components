@@ -2,7 +2,7 @@ import { Component, Element, Event, EventEmitter, Host, Prop, Watch, h } from "@
 import { CalciteLayout, CalcitePosition, CalciteTheme } from "../interfaces";
 import { CalciteExpandToggle, toggleChildActionText } from "../utils/CalciteExpandToggle";
 import { CSS, SLOTS, TEXT } from "./resources";
-import { getCalcitePosition, getElementProp } from "../utils/dom";
+import { getCalcitePosition } from "../utils/dom";
 
 /**
  * @slot bottom-actions - A slot for adding `calcite-action`s that will appear at the bottom of the action bar, above the collapse/expand button.
@@ -146,6 +146,7 @@ export class CalciteActionBar {
       el,
       layout,
       position,
+      theme,
       toggleExpand
     } = this;
 
@@ -158,7 +159,7 @@ export class CalciteActionBar {
         intlExpand={expandLabel}
         intlCollapse={collapseLabel}
         el={el}
-        theme={getElementProp(el, "theme", "light")}
+        theme={theme}
         position={getCalcitePosition(position, layout)}
         toggleExpand={toggleExpand}
       />

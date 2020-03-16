@@ -8,7 +8,7 @@ import { CSS } from "./resources";
 
 import { CSS_UTILITY } from "../utils/resources";
 
-import { getElementDir, getElementProp } from "../utils/dom";
+import { getElementDir } from "../utils/dom";
 import { State, VNode, Watch } from "@stencil/core/internal";
 
 /**
@@ -179,15 +179,15 @@ export class CalciteAction {
   }
 
   toggleTooltip = (tooltip: boolean): void => {
-    const { el, tooltipEl, textEnabled, tooltipText } = this;
+    const { el, tooltipEl, textEnabled, tooltipText, theme } = this;
 
     if (tooltip && tooltipText && !textEnabled) {
       const tooltipElement = this.setUpTooltip();
       tooltipElement.textContent = tooltipText;
       tooltipElement.referenceElement = el;
-      tooltipElement.theme = getElementProp(el, "theme", "light");
+      tooltipElement.theme = theme;
     } else {
-      tooltipEl && document.body.removeChild(tooltipEl);
+      tooltipEl?.parentElement?.removeChild(tooltipEl);
       this.tooltipEl = null;
     }
   };
